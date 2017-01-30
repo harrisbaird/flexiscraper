@@ -21,7 +21,7 @@ func TestParse(t *testing.T) {
 	c := loadFixture("testdata/qwertee.html")
 	var items []QwerteeItem
 
-	c.Loop("//div[contains(@class, \"big-slide\") and contains(@class, \"tee\")]/div", func(i int, c *Context) {
+	c.Each("//div[contains(@class, \"big-slide\") and contains(@class, \"tee\")]/div", func(i int, c *Context) {
 		item := QwerteeItem{}
 		item.Name = c.Find("@data-name")
 		item.User = c.Find("@data-user")

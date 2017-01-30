@@ -63,7 +63,7 @@ func (c *Context) Or(values ...*QueryValue) *QueryValue {
 	return &QueryValue{Error: ErrZeroMatches}
 }
 
-func (c *Context) Loop(sel string, fn func(int, *Context)) {
+func (c *Context) Each(sel string, fn func(int, *Context)) {
 	list := xmlpath.MustCompile(sel)
 	items := list.Iter(c.Node)
 	i := 0
