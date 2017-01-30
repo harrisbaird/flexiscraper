@@ -2,7 +2,9 @@ package flexiscraper
 
 import (
 	"errors"
+	"io"
 	"net/http"
+	"strconv"
 
 	"github.com/harrisbaird/flexiscraper/q"
 	xmlpath "gopkg.in/xmlpath.v2"
@@ -16,16 +18,26 @@ func Fetch(url string) (*Context, error) {
 		return nil, err
 	}
 	defer res.Body.Close()
-	node, err := xmlpath.ParseHTML(res.Body)
+	return Parse(res.Body)
+}
+
+func Parse(r io.Reader) (*Context, error) {
+	node, err := xmlpath.ParseHTML(r)
 	if err != nil {
 		return nil, err
 	}
+
 	return &Context{Node: node}, nil
 }
 
 type Context struct {
 	Node   *xmlpath.Node
 	Errors []error
+}
+
+// Find looks up an xpath expression and returns the first match as a string.
+func (c *Context) Find(exp string) string {
+	return c.Build(q.XPath(exp)).String()
 }
 
 func (c *Context) Build(queries ...q.QueryFunc) *QueryValue {
@@ -68,9 +80,10 @@ type QueryValue struct {
 }
 
 func (q *QueryValue) String() string {
-	if q.Error != nil {
-		return ""
-	}
-
 	return q.Value
+}
+
+func (q *QueryValue) Int() int {
+	v, _ := strconv.Atoi(q.Value)
+	return v
 }
