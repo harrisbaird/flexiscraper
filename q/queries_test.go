@@ -14,14 +14,14 @@ func TestReplace(t *testing.T) {
 	tests := []struct {
 		name     string
 		template string
-		value    string
-		result   string
+		value    []string
+		result   []string
 		wantErr  bool
 	}{
-		{"blank", "", "", "", false},
-		{"valid", "hello %s", "world", "hello world", false},
-		{"missing", "hello", "world", "hello%!(EXTRA string=world)", false},
-		{"extra", "hello %s, %s", "world", "hello world, %!s(MISSING)", false},
+		{"blank", "", []string{}, []string{}, false},
+		{"valid", "hello %s", []string{"world"}, []string{"hello world"}, false},
+		{"missing", "hello", []string{"world"}, []string{"hello%!(EXTRA string=world)"}, false},
+		{"extra", "hello %s, %s", []string{"world"}, []string{"hello world, %!s(MISSING)"}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -36,13 +36,13 @@ func TestRegexp(t *testing.T) {
 	tests := []struct {
 		name    string
 		regex   string
-		value   string
-		result  string
+		value   []string
+		result  []string
 		wantErr bool
 	}{
-		{"blank", "", "", "", false},
-		{"invalid", "(.*", "value", "", true},
-		{"valid", "\\d+", "Post 5", "5", false},
+		{"blank", "", []string{""}, []string{""}, false},
+		{"invalid", "(.*", []string{"value"}, []string{"value"}, true},
+		{"valid", "\\d+", []string{"Post 5"}, []string{"5"}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -61,17 +61,17 @@ func TestXPath(t *testing.T) {
 	tests := []struct {
 		name    string
 		exp     string
-		result  string
+		result  []string
 		wantErr bool
 	}{
-		{"blank", "", "", true},
-		{"valid", "//title", "Hello world", false},
-		{"invalid", "~~Test", "", true},
-		{"no match", "//invalid", "", true},
+		{"blank", "", []string{}, true},
+		{"valid", "//title", []string{"Hello world"}, false},
+		{"invalid", "~~Test", []string{}, true},
+		{"no match", "//invalid", []string{}, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := XPath(tt.exp)(node, "")
+			result, err := XPath(tt.exp)(node, []string{})
 			st.Assert(t, err != nil, tt.wantErr)
 			st.Assert(t, result, tt.result)
 		})

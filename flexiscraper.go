@@ -40,6 +40,10 @@ func (c *Context) Find(exp string) string {
 	return c.Build(q.XPath(exp)).String()
 }
 
+func (c *Context) FindAll(exp string) []string {
+	return c.Build(q.XPath(exp)).StringSlice()
+}
+
 func (c *Context) Build(queries ...q.QueryFunc) *QueryValue {
 	out := QueryValue{}
 	for _, query := range queries {
@@ -75,15 +79,34 @@ func (c *Context) Each(sel string, fn func(int, *Context)) {
 }
 
 type QueryValue struct {
-	Value string
+	Value []string
 	Error error
 }
 
 func (q *QueryValue) String() string {
+	if len(q.Value) == 0 {
+		return ""
+	}
+
+	return q.Value[0]
+}
+
+func (q *QueryValue) StringSlice() []string {
 	return q.Value
 }
 
 func (q *QueryValue) Int() int {
-	v, _ := strconv.Atoi(q.Value)
-	return v
+	if len(q.IntSlice()) == 0 {
+		return 0
+	}
+
+	return q.IntSlice()[0]
+}
+
+func (q *QueryValue) IntSlice() (s []int) {
+	for _, value := range q.Value {
+		v, _ := strconv.Atoi(value)
+		s = append(s, v)
+	}
+	return
 }
