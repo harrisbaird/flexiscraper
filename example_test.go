@@ -20,7 +20,7 @@ type QwerteeItem struct {
 	LastChance     bool
 }
 
-func TestParse(t *testing.T) {
+func TestExample(t *testing.T) {
 	r, err := recorder.New("testdata/qwertee")
 	if err != nil {
 		log.Fatal(err)
@@ -31,7 +31,7 @@ func TestParse(t *testing.T) {
 	scraper.HTTPClient = &http.Client{Transport: r}
 
 	domain := scraper.NewDomain("http://qwertee.com")
-	c, err := domain.Fetch("http://qwertee.com")
+	c, err := domain.FetchRoot()
 	if err != nil {
 		panic(err)
 	}

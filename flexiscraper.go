@@ -118,6 +118,12 @@ func (d *Domain) Fetch(currentURL string) (*Context, error) {
 	return d.Parse(res.Body)
 }
 
+// FetchRoot convinience function for fetching the current domains root URL.
+func (d *Domain) FetchRoot() (*Context, error) {
+	return d.Fetch(d.Domain.String())
+}
+
+// Parse html from the given reader.
 func (d *Domain) Parse(r io.Reader) (*Context, error) {
 	node, err := xmlpath.ParseHTML(r)
 	if err != nil {
