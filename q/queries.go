@@ -7,7 +7,7 @@ import (
 
 var ErrNoMatches = errors.New("No matching queries")
 
-func Build(queries ...QueryFunc) *QueryValue {
+func Build(queries ...ProcessorFunc) *QueryValue {
 	out := QueryValue{}
 	for _, query := range queries {
 		v, err := query(out.Value)

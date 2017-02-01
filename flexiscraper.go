@@ -13,7 +13,8 @@ import (
 	xmlpath "gopkg.in/xmlpath.v2"
 )
 
-// DefaultUserAgent is the default user agent string.
+// DefaultUserAgent is the default user agent string. It's used in all http
+// requests and during robots.txt validation.
 const DefaultUserAgent = "Flexiscraper (https://github.com/harrisbaird/flexiscraper)"
 
 // ErrDisallowedByRobots is returned when the requested URL is disallowed
@@ -23,6 +24,7 @@ var ErrDisallowedByRobots = errors.New("HTTP request disallowed by robots.txt")
 // Path used for robots.txt fetching.
 var robotsTxtParsedPath, _ = url.Parse("/robots.txt")
 
+// New initialises a new Scraper.
 func New() *Scraper {
 	return &Scraper{
 		ObeyRobots: true,
@@ -31,6 +33,7 @@ func New() *Scraper {
 	}
 }
 
+// A Scraper defines the parameters for running a web scraper.
 type Scraper struct {
 	// The user agent string sent during http requests and when checking
 	// robots.txt.
@@ -44,7 +47,7 @@ type Scraper struct {
 	ObeyRobots bool
 }
 
-// NewDomain initialized a new domain.
+// NewDomain initialises a new domain.
 // This is used for robots.txt and to ensure absolute urls.
 func (s *Scraper) NewDomain(baseDomain string) *Domain {
 	domainURL, _ := url.Parse(baseDomain)

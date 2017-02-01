@@ -8,12 +8,11 @@ import (
 	xmlpath "gopkg.in/xmlpath.v2"
 )
 
-var ErrNodeNotSet = errors.New("AddXPath called but ScrapedItem.Node wasn't set")
-
-type QueryFunc func([]string) ([]string, error)
+// ProcessorFunc is the return value for all processors
+type ProcessorFunc func([]string) ([]string, error)
 
 // XPath performs an xpath query on the current node.
-func XPath(node *xmlpath.Node, xpathExp string) QueryFunc {
+func XPath(node *xmlpath.Node, xpathExp string) ProcessorFunc {
 	return func(values []string) ([]string, error) {
 		p, err := xmlpath.Compile(xpathExp)
 		if err != nil {
@@ -33,15 +32,15 @@ func XPath(node *xmlpath.Node, xpathExp string) QueryFunc {
 	}
 }
 
-// Use the input value with no processing.
-func With(v []string) QueryFunc {
+// With uses the given input with no processing.
+func With(v []string) ProcessorFunc {
 	return func(values []string) ([]string, error) {
 		return v, nil
 	}
 }
 
 // Replace calls sprintf using template and previous value in query chain.
-func Replace(template string) QueryFunc {
+func Replace(template string) ProcessorFunc {
 	return func(values []string) ([]string, error) {
 		for i, v := range values {
 			values[i] = fmt.Sprintf(template, v)
@@ -53,7 +52,7 @@ func Replace(template string) QueryFunc {
 
 // Regexp performs a regular expression on the previous value in query chain,
 // returning the first matched string.
-func Regexp(r string) QueryFunc {
+func Regexp(r string) ProcessorFunc {
 	return func(values []string) ([]string, error) {
 		for i, v := range values {
 			rx, err := regexp.Compile(r)
