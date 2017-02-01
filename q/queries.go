@@ -2,59 +2,62 @@ package q
 
 import (
 	"errors"
-	"fmt"
-	"regexp"
-
-	xmlpath "gopkg.in/xmlpath.v2"
+	"strconv"
 )
 
-var ErrNodeNotSet = errors.New("AddXPath called but ScrapedItem.Node wasn't set")
+var ErrNoMatches = errors.New("No matching queries")
 
-type QueryFunc func(*xmlpath.Node, []string) ([]string, error)
-
-// Replace calls sprintf using template and previous value in query chain.
-func Replace(template string) QueryFunc {
-	return func(node *xmlpath.Node, values []string) ([]string, error) {
-		for i, v := range values {
-			values[i] = fmt.Sprintf(template, v)
-		}
-
-		return values, nil
-	}
-}
-
-// Regexp performs a regular expression on the previous value in query chain,
-// returning the first matched string.
-func Regexp(r string) QueryFunc {
-	return func(node *xmlpath.Node, values []string) ([]string, error) {
-		for i, v := range values {
-			rx, err := regexp.Compile(r)
-			if err != nil {
-				return values, err
-			}
-			values[i] = rx.FindString(v)
-		}
-		return values, nil
-	}
-}
-
-// XPath performs an xpath query on the current node.
-func XPath(exp string) QueryFunc {
-	return func(node *xmlpath.Node, values []string) ([]string, error) {
-		p, err := xmlpath.Compile(exp)
+func Build(queries ...QueryFunc) *QueryValue {
+	out := QueryValue{}
+	for _, query := range queries {
+		v, err := query(out.Value)
 		if err != nil {
-			return values, err
+			out.Error = err
+			break
 		}
-
-		nodes := p.Iter(node)
-		for nodes.Next() {
-			values = append(values, nodes.Node().String())
-		}
-
-		if len(values) == 0 {
-			return values, errors.New("XPath didn't match: " + exp)
-		}
-
-		return values, nil
+		out.Value = v
 	}
+	return &out
+}
+
+func Or(values ...*QueryValue) *QueryValue {
+	for _, value := range values {
+		if value.Error == nil {
+			return value
+		}
+	}
+	return &QueryValue{Error: ErrNoMatches}
+}
+
+type QueryValue struct {
+	Value []string
+	Error error
+}
+
+func (qv *QueryValue) String() string {
+	if len(qv.Value) == 0 {
+		return ""
+	}
+
+	return qv.Value[0]
+}
+
+func (qv *QueryValue) StringSlice() []string {
+	return qv.Value
+}
+
+func (qv *QueryValue) Int() int {
+	if len(qv.IntSlice()) == 0 {
+		return 0
+	}
+
+	return qv.IntSlice()[0]
+}
+
+func (qv *QueryValue) IntSlice() (s []int) {
+	for _, value := range qv.Value {
+		v, _ := strconv.Atoi(value)
+		s = append(s, v)
+	}
+	return
 }

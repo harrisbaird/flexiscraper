@@ -25,7 +25,7 @@ func TestReplace(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := Replace(tt.template)(nil, tt.value)
+			result, err := Replace(tt.template)(tt.value)
 			st.Assert(t, err != nil, tt.wantErr)
 			st.Assert(t, result, tt.result)
 		})
@@ -46,7 +46,26 @@ func TestRegexp(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := Regexp(tt.regex)(nil, tt.value)
+			result, err := Regexp(tt.regex)(tt.value)
+			st.Assert(t, err != nil, tt.wantErr)
+			st.Assert(t, result, tt.result)
+		})
+	}
+}
+
+func TestWith(t *testing.T) {
+	tests := []struct {
+		name    string
+		input   []string
+		result  []string
+		wantErr bool
+	}{
+		{"blank", []string{""}, []string{""}, false},
+		{"valid", []string{"value"}, []string{"value"}, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result, err := With(tt.input)([]string{})
 			st.Assert(t, err != nil, tt.wantErr)
 			st.Assert(t, result, tt.result)
 		})
@@ -71,7 +90,7 @@ func TestXPath(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := XPath(tt.exp)(node, []string{})
+			result, err := XPath(node, tt.exp)([]string{})
 			st.Assert(t, err != nil, tt.wantErr)
 			st.Assert(t, result, tt.result)
 		})
