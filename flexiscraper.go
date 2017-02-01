@@ -16,8 +16,11 @@ import (
 // DefaultUserAgent is the default user agent string.
 const DefaultUserAgent = "Flexiscraper (https://github.com/harrisbaird/flexiscraper)"
 
+// ErrDisallowedByRobots is returned when the requested URL is disallowed
+// by robots.txt.
 var ErrDisallowedByRobots = errors.New("HTTP request disallowed by robots.txt")
 
+// Path used for robots.txt fetching.
 var robotsTxtParsedPath, _ = url.Parse("/robots.txt")
 
 func New() *Scraper {
@@ -41,6 +44,8 @@ type Scraper struct {
 	ObeyRobots bool
 }
 
+// NewDomain initialized a new domain.
+// This is used for robots.txt and to ensure absolute urls.
 func (s *Scraper) NewDomain(baseDomain string) *Domain {
 	domainURL, _ := url.Parse(baseDomain)
 
@@ -87,20 +92,23 @@ func (s *Scraper) getRequest(url string) (*http.Response, error) {
 	return s.HTTPClient.Do(req)
 }
 
+// Domain defines implementation for scraping a single domain.
 type Domain struct {
 	*Scraper
 	Domain     *url.URL
 	RobotsData *robotstxt.Group
 }
 
+// Fetch and parse html from the given URL, checks and obeys robots.txt if
+// ObeyRobots is true in the scraper.
 func (d *Domain) Fetch(currentURL string) (*Context, error) {
+	currentURL = d.ensureAbsolute(currentURL)
+
 	if d.ObeyRobots {
 		if !d.RobotsData.Test(currentURL) {
 			return nil, ErrDisallowedByRobots
 		}
 	}
-
-	currentURL = d.ensureAbsolute(currentURL)
 
 	res, err := d.getRequest(currentURL)
 	if err != nil {

@@ -13,9 +13,9 @@ var ErrNodeNotSet = errors.New("AddXPath called but ScrapedItem.Node wasn't set"
 type QueryFunc func([]string) ([]string, error)
 
 // XPath performs an xpath query on the current node.
-func XPath(node *xmlpath.Node, exp string) QueryFunc {
+func XPath(node *xmlpath.Node, xpathExp string) QueryFunc {
 	return func(values []string) ([]string, error) {
-		p, err := xmlpath.Compile(exp)
+		p, err := xmlpath.Compile(xpathExp)
 		if err != nil {
 			return values, err
 		}
@@ -26,7 +26,7 @@ func XPath(node *xmlpath.Node, exp string) QueryFunc {
 		}
 
 		if len(values) == 0 {
-			return values, errors.New("XPath didn't match: " + exp)
+			return values, errors.New("XPath didn't match: " + xpathExp)
 		}
 
 		return values, nil

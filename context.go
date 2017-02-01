@@ -10,18 +10,20 @@ type Context struct {
 	Errors []error
 }
 
-// Find looks up an xpath expression and returns the first match as a string.
-func (c *Context) Find(exp string) string {
-	return q.Build(q.XPath(c.Node, exp)).String()
+// Find looks up a given xpath expression and returns the first match.
+func (c *Context) Find(xpathExp string) string {
+	return q.Build(q.XPath(c.Node, xpathExp)).String()
 }
 
-// Find looks up an xpath expression and returns all matches.
-func (c *Context) FindAll(exp string) []string {
-	return q.Build(q.XPath(c.Node, exp)).StringSlice()
+// FindAll looks up a given xpath expression and returns all matches.
+func (c *Context) FindAll(xpathExp string) []string {
+	return q.Build(q.XPath(c.Node, xpathExp)).StringSlice()
 }
 
-func (c *Context) Each(sel string, fn func(int, *Context)) {
-	list := xmlpath.MustCompile(sel)
+// Each finds nodes matching an xpath expression and calls the given function
+// for each node.
+func (c *Context) Each(xpathExp string, fn func(int, *Context)) {
+	list := xmlpath.MustCompile(xpathExp)
 	items := list.Iter(c.Node)
 	i := 0
 	for items.Next() {
