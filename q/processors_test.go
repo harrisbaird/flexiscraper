@@ -1,10 +1,7 @@
 package q_test
 
 import (
-	"strings"
 	"testing"
-
-	xmlpath "gopkg.in/xmlpath.v2"
 
 	. "github.com/harrisbaird/flexiscraper/q"
 	"github.com/nbio/st"
@@ -47,50 +44,6 @@ func TestRegexp(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result, err := Regexp(tt.regex)(tt.value)
-			st.Assert(t, err != nil, tt.wantErr)
-			st.Assert(t, result, tt.result)
-		})
-	}
-}
-
-func TestWith(t *testing.T) {
-	tests := []struct {
-		name    string
-		input   []string
-		result  []string
-		wantErr bool
-	}{
-		{"blank", []string{""}, []string{""}, false},
-		{"valid", []string{"value"}, []string{"value"}, false},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			result, err := With(tt.input)([]string{})
-			st.Assert(t, err != nil, tt.wantErr)
-			st.Assert(t, result, tt.result)
-		})
-	}
-}
-
-func TestXPath(t *testing.T) {
-	r := strings.NewReader("<!DOCTYPE html><html><head><title>Hello world</title></head><body><h1>Test</h1></body></html>")
-	node, err := xmlpath.ParseHTML(r)
-	st.Assert(t, err, nil)
-
-	tests := []struct {
-		name    string
-		exp     string
-		result  []string
-		wantErr bool
-	}{
-		{"blank", "", []string{}, true},
-		{"valid", "//title", []string{"Hello world"}, false},
-		{"invalid", "~~Test", []string{}, true},
-		{"no match", "//invalid", []string{}, true},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			result, err := XPath(node, tt.exp)([]string{})
 			st.Assert(t, err != nil, tt.wantErr)
 			st.Assert(t, result, tt.result)
 		})

@@ -42,14 +42,14 @@ func TestExample(t *testing.T) {
 		item := QwerteeItem{}
 		item.Name = c.Find("@data-name")
 		item.User = c.Find("@data-user")
-		item.ImageURL = Build(XPath(c.Node, "@data-id"), Replace("https://www.qwertee.com/images/designs/zoom/%s.jpg")).String()
-		item.OtherImageURLs = Build(XPath(c.Node, ".//source/@srcset"), Replace("https://www.qwertee.com%s")).StringSlice()
+		item.ImageURL = c.Build(XPath("@data-id"), Replace("https://www.qwertee.com/images/designs/zoom/%s.jpg")).String()
+		item.OtherImageURLs = c.Build(XPath(".//source/@srcset"), Replace("https://www.qwertee.com%s")).StringSlice()
 		item.LastChance = i > 2
 
 		currencies := []string{"usd", "gbp", "eur"}
 		prices := map[string]int{}
 		for _, currency := range currencies {
-			prices[currency] = Build(XPath(c.Node, "@data-tee-price-"+currency), Replace("%s00")).Int()
+			prices[currency] = c.Build(XPath("@data-tee-price-"+currency), Replace("%s00")).Int()
 		}
 		item.Prices = prices
 
