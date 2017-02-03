@@ -23,6 +23,8 @@ go get -u github.com/harrisbaird/flexiscraper
 package main
 
 import (
+	"log"
+
 	"github.com/harrisbaird/flexiscraper"
 	q "github.com/harrisbaird/flexiscraper/q"
 )
@@ -35,26 +37,32 @@ type HackerNewsItem struct {
 }
 
 func main() {
-  scraper := flexiscraper.New()
-  hackerNews := scraper.NewDomain("https://news.ycombinator.com/")
-  c, err := hackerNews.FetchRoot()
-  if err != nil {
-    panic(err)
-  }
+	scraper := flexiscraper.New()
+	hackerNews := scraper.NewDomain("https://news.ycombinator.com/")
+	c, err := hackerNews.FetchRoot()
+	if err != nil {
+		log.Fatalln(err)
+	}
 
-  items := []HackerNewsItem{}
+	items := []HackerNewsItem{}
 
-  c.Each("//tr[@class=\"athing\"]", func(i int, c *Context) {
-    item := HackerNewsItem{
-      Title: c.Find(".//td[@class=\"title\"]/a"),
-      URL:   c.Find(".//td[@class=\"title\"]/a/@href"),
-      User:  c.Find(".//following-sibling::tr//a[@class=\"hnuser\"]"),
-      Points: q.Build(
-        q.XPath(c.Node, ".//following-sibling::tr//span[@class=\"age\"]"),
-        q.Regexp("(\\d+)"),
-      ).Int(),
-    }
-    items = append(items, item)
-  })
+	// Iterate through nodes matching XPath expression
+	c.Each("//tr[@class=\"athing\"]", func(i int, c *Context) {
+		item := HackerNewsItem{
+			// Find is a convience function for looking up an XPath expression,
+			// returning the first result as a string.
+			Title: c.Find(".//td[@class=\"title\"]/a"),
+			URL:   c.Find(".//td[@class=\"title\"]/a/@href"),
+			User:  c.Find(".//following-sibling::tr//a[@class=\"hnuser\"]"),
+
+			// Create a more complex value and return as an int.
+			Points: c.Build(
+				q.XPath(".//following-sibling::tr//span[@class=\"age\"]"),
+				q.Regexp("\\d+"),
+			).Int(),
+		}
+
+		items = append(items, item)
+	})
 }
 ```
