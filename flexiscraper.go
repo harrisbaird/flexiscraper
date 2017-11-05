@@ -104,21 +104,22 @@ type Domain struct {
 
 // Fetch and parse html from the given URL, checks and obeys robots.txt if
 // ObeyRobots is true in the scraper.
-func (d *Domain) Fetch(currentURL string) (*Context, error) {
-	currentURL = d.ensureAbsolute(currentURL)
+func (d *Domain) Fetch(url string) (*Context, error) {
+	context := &Context{URL: d.ensureAbsolute(url)}
 
 	if d.ObeyRobots {
-		if !d.RobotsData.Test(currentURL) {
+		if !d.RobotsData.Test(url) {
 			return nil, ErrDisallowedByRobots
 		}
 	}
 
-	res, err := d.getRequest(currentURL)
+	res, err := d.getRequest(url)
 	if err != nil {
 		return nil, err
 	}
 	defer res.Body.Close()
-	return d.Parse(res.Body)
+	d.Parse(context, res.Body)
+	return context, nil
 }
 
 // FetchRoot convinience function for fetching the current domains root URL.
@@ -127,13 +128,10 @@ func (d *Domain) FetchRoot() (*Context, error) {
 }
 
 // Parse html from the given reader.
-func (d *Domain) Parse(r io.Reader) (*Context, error) {
+func (d *Domain) Parse(context *Context, r io.Reader) error {
 	node, err := xmlpath.ParseHTML(r)
-	if err != nil {
-		return nil, err
-	}
-
-	return &Context{Node: node}, nil
+	context.Node = node
+	return err
 }
 
 func (d *Domain) ensureAbsolute(currentURL string) string {

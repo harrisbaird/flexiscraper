@@ -10,6 +10,7 @@ import (
 var ErrNoMatches = errors.New("No matching queries")
 
 type Context struct {
+	URL    string
 	Node   *xmlpath.Node
 	Errors []error
 }
