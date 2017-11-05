@@ -109,17 +109,17 @@ func (d *Domain) Fetch(url string) (*Context, error) {
 
 	if d.ObeyRobots {
 		if !d.RobotsData.Test(url) {
-			return nil, ErrDisallowedByRobots
+			return context, ErrDisallowedByRobots
 		}
 	}
 
-	res, err := d.getRequest(url)
+	res, err := d.getRequest(context.URL)
 	if err != nil {
-		return nil, err
+		return context, err
 	}
 	defer res.Body.Close()
-	d.Parse(context, res.Body)
-	return context, nil
+	err = d.Parse(context, res.Body)
+	return context, err
 }
 
 // FetchRoot convinience function for fetching the current domains root URL.
