@@ -32,7 +32,7 @@ func (c *Context) Each(xpathExp string, fn func(int, *Context)) {
 	items := list.Iter(c.Node)
 	i := 0
 	for items.Next() {
-		c := Context{Node: items.Node()}
+		c := Context{URL: c.URL, Node: items.Node()}
 		fn(i, &c)
 		i++
 	}
