@@ -4,15 +4,14 @@ import (
 	"strings"
 	"testing"
 
-	xmlpath "gopkg.in/xmlpath.v2"
-
+	"github.com/antchfx/xquery/html"
 	. "github.com/harrisbaird/flexiscraper/q"
 	"github.com/nbio/st"
 )
 
 func TestXPath(t *testing.T) {
 	r := strings.NewReader("<!DOCTYPE html><html><head><title>Hello world</title></head><body><h1>Test</h1></body></html>")
-	node, err := xmlpath.ParseHTML(r)
+	node, err := htmlquery.Parse(r)
 	st.Assert(t, err, nil)
 
 	tests := []struct {

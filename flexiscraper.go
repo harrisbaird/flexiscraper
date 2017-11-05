@@ -8,9 +8,8 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/antchfx/xquery/html"
 	"github.com/temoto/robotstxt"
-
-	xmlpath "gopkg.in/xmlpath.v2"
 )
 
 // DefaultUserAgent is the default user agent string. It's used in all http
@@ -105,7 +104,7 @@ type Domain struct {
 // Fetch and parse html from the given URL, checks and obeys robots.txt if
 // ObeyRobots is true in the scraper.
 func (d *Domain) Fetch(url string) (*Context, error) {
-	context := &Context{URL: d.ensureAbsolute(url)}
+	context := &Context{URL: d.makeAbsoluteURL(url)}
 
 	if d.ObeyRobots {
 		if !d.RobotsData.Test(url) {
@@ -129,12 +128,12 @@ func (d *Domain) FetchRoot() (*Context, error) {
 
 // Parse html from the given reader.
 func (d *Domain) Parse(context *Context, r io.Reader) error {
-	node, err := xmlpath.ParseHTML(r)
+	node, err := htmlquery.Parse(r)
 	context.Node = node
 	return err
 }
 
-func (d *Domain) ensureAbsolute(currentURL string) string {
+func (d *Domain) makeAbsoluteURL(currentURL string) string {
 	parsed, err := url.Parse(currentURL)
 	if err != nil {
 		return currentURL

@@ -3,39 +3,40 @@ package flexiscraper
 import (
 	"errors"
 
+	"github.com/antchfx/xquery/html"
 	"github.com/harrisbaird/flexiscraper/q"
-	xmlpath "gopkg.in/xmlpath.v2"
+	"golang.org/x/net/html"
 )
 
 var ErrNoMatches = errors.New("No matching queries")
 
 type Context struct {
 	URL    string
-	Node   *xmlpath.Node
+	Node   *html.Node
 	Errors []error
 }
 
 // Find looks up a given xpath expression and returns the first match.
-func (c *Context) Find(xpathExp string) string {
-	return c.Build(q.XPath(xpathExp)).String()
+func (c *Context) Find(expr string) string {
+	return c.Build(q.XPath(expr)).String()
 }
 
 // FindAll looks up a given xpath expression and returns all matches.
-func (c *Context) FindAll(xpathExp string) []string {
-	return c.Build(q.XPath(xpathExp)).StringSlice()
+func (c *Context) FindAll(expr string) []string {
+	return c.Build(q.XPath(expr)).StringSlice()
+}
+
+func (c *Context) Attr(expr string) string {
+	return htmlquery.SelectAttr(c.Node, expr)
 }
 
 // Each finds nodes matching an xpath expression and calls the given function
 // for each node.
-func (c *Context) Each(xpathExp string, fn func(int, *Context)) {
-	list := xmlpath.MustCompile(xpathExp)
-	items := list.Iter(c.Node)
-	i := 0
-	for items.Next() {
-		c := Context{URL: c.URL, Node: items.Node()}
+func (c *Context) Each(expr string, fn func(int, *Context)) {
+	htmlquery.FindEach(c.Node, expr, func(i int, node *html.Node) {
+		c := Context{URL: c.URL, Node: node}
 		fn(i, &c)
-		i++
-	}
+	})
 }
 
 func (c *Context) Build(input q.InputFunc, processors ...q.ProcessorFunc) *QueryValue {

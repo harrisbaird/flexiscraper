@@ -14,8 +14,8 @@ go get -u github.com/harrisbaird/flexiscraper
 ```
 
 ### External Dependancies
-* [xmlpath](http://gopkg.in/xmlpath.v2)
-* [robotstxt](github.com/temoto/robotstxt)
+* [xquery](https://github.com/antchfx/xquery)
+* [robotstxt](https://github.com/temoto/robotstxt)
 
 ## Usage
 

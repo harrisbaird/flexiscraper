@@ -1,39 +1,52 @@
 package q
 
 import (
-	"errors"
+	"fmt"
 
-	xmlpath "gopkg.in/xmlpath.v2"
+	"github.com/antchfx/xpath"
+	"github.com/antchfx/xquery/html"
+	"golang.org/x/net/html"
 )
 
 // InputFunc is the return value for all inputs.
-type InputFunc func(*xmlpath.Node) ([]string, error)
+type InputFunc func(*html.Node) ([]string, error)
 
 // XPath performs an xpath query on the current node.
-func XPath(xpathExp string) InputFunc {
-	return func(node *xmlpath.Node) ([]string, error) {
+func XPath(expr string) InputFunc {
+	return func(node *html.Node) ([]string, error) {
 		output := []string{}
-		p, err := xmlpath.Compile(xpathExp)
+
+		expr, err := xpath.Compile(expr)
 		if err != nil {
 			return output, err
 		}
 
-		nodes := p.Iter(node)
-		for nodes.Next() {
-			output = append(output, nodes.Node().String())
-		}
+		htmlquery.FindEach(node, expr.String(), func(i int, node *html.Node) {
+			output = append(output, htmlquery.InnerText(node))
+		})
 
 		if len(output) == 0 {
-			return output, errors.New("XPath didn't match: " + xpathExp)
+			return output, fmt.Errorf("XPath didn't match: %s", expr)
 		}
 
 		return output, nil
 	}
 }
 
+func Attr(expr string) InputFunc {
+	return func(node *html.Node) ([]string, error) {
+		expr, err := xpath.Compile(expr)
+		if err != nil {
+			return []string{}, err
+		}
+
+		return []string{htmlquery.SelectAttr(node, expr.String())}, nil
+	}
+}
+
 // With uses the given input with no processing.
 func With(v []string) InputFunc {
-	return func(node *xmlpath.Node) ([]string, error) {
+	return func(node *html.Node) ([]string, error) {
 		return v, nil
 	}
 }

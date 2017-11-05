@@ -40,16 +40,16 @@ func TestExample(t *testing.T) {
 
 	c.Each("//div[contains(@class, \"big-slide\") and contains(@class, \"tee\")]/div", func(i int, c *Context) {
 		item := QwerteeItem{}
-		item.Name = c.Find("@data-name")
-		item.User = c.Find("@data-user")
-		item.ImageURL = c.Build(XPath("@data-id"), Replace("https://www.qwertee.com/images/designs/zoom/%s.jpg")).String()
+		item.Name = c.Attr("data-name")
+		item.User = c.Attr("data-user")
+		item.ImageURL = c.Build(Attr("data-id"), Replace("https://www.qwertee.com/images/designs/zoom/%s.jpg")).String()
 		item.OtherImageURLs = c.Build(XPath(".//source/@srcset"), Replace("https://www.qwertee.com%s")).StringSlice()
 		item.LastChance = i > 2
 
 		currencies := []string{"usd", "gbp", "eur"}
 		prices := map[string]int{}
 		for _, currency := range currencies {
-			prices[currency] = c.Build(XPath("@data-tee-price-"+currency), Replace("%s00")).Int()
+			prices[currency] = c.Build(Attr("data-tee-price-"+currency), Replace("%s00")).Int()
 		}
 		item.Prices = prices
 
