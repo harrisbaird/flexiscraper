@@ -13,4 +13,4 @@ install:
 - go get github.com/mattn/goveralls
 
 script:
-- $HOME/gopath/bin/goveralls -service=travis-ci
+- $HOME/gopath/bin/goveralls -v -service=travis-ci
